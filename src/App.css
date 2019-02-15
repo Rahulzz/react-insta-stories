@@ -1,33 +1,443 @@
-.App {
+@font-face {
+  font-family: "bw_modelicabold";
+  src: url("./fonts/bwmodelica-bold_0-webfont.woff2") format("woff2"),
+    url("./fonts/bwmodelica-bold_0-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "bw_modelicaregular";
+  src: url("./fonts/bwmodelica-regular-webfont.woff2") format("woff2"),
+    url("./fonts/bwmodelica-regular-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "icomoon";
+  src: url("./fonts/icomoon.eot?3sa93d");
+  src: url("./fonts/icomoon.eot?3sa93d#iefix") format("embedded-opentype"),
+    url("./fonts/icomoon.ttf?3sa93d") format("truetype"),
+    url("./fonts/icomoon.woff?3sa93d") format("woff"),
+    url("./fonts/icomoon.svg?3sa93d#icomoon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.icon {
+  font-family: icomoon !important;
+}
+
+.icon-download:before {
+  content: "\e900";
+}
+
+.icon-draw:before {
+  content: "\e901";
+}
+
+.icon-stickers:before {
+  content: "\e902";
+}
+
+.icon-story:before {
+  content: "\e903";
+}
+
+.icon-text:before {
+  content: "\e904";
+}
+
+.icon-exit:before {
+  content: "\e905";
+}
+
+.icon-trash:before {
+  content: "\e906";
+}
+
+input:focus,
+textarea:focus,
+button:focus {
+  outline: 0 !important;
+}
+
+body {
+  overscroll-behavior: contain;
+}
+
+a {
+  text-decoration: none !important;
+}
+
+.ease-element {
+  -webkit-transition: all 0.3s ease-in-out;
+  -moz-transition: all 0.3s ease-in-out;
+  -ms-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+}
+
+.disable_user_selection {
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+.insta-home {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: -webkit-gradient(
+    linear,
+    left top,
+    right bottom,
+    color-stop(0, #ffffff),
+    color-stop(1, #eaecee)
+  );
+  background-image: gradient(
+    linear,
+    left top,
+    right bottom,
+    color-stop(0, #ffffff),
+    color-stop(1, #eaecee)
+  );
+}
+
+.hidden-image-picker {
+  display: none;
+}
+
+.insta-home .icon-button {
+  display: flex;
+  align-items: center;
+  background-image: -webkit-gradient(
+    linear,
+    left top,
+    right top,
+    color-stop(0, #fc4a1a),
+    color-stop(1, #f7b733)
+  );
+  background-image: gradient(
+    linear,
+    left top,
+    right top,
+    color-stop(0, #fc4a1a),
+    color-stop(1, #f7b733)
+  );
+  border: none;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.insta-home .icon-button .icon {
+  font-size: 1em;
+}
+
+.insta-home .icon-button .text {
+  font-size: 0.8em;
+  margin-left: 10px;
+  font-family: "bw_modelicabold";
+  text-transform: uppercase;
+}
+
+.insta-image-editor {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.insta-image-editor .image-container img {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+}
+
+.insta-page-options-container {
+  position: absolute;
+  z-index: 3;
+  width: 100%;
+  padding: 20px 0px;
+  display: flex;
+  justify-content: space-between;
+  color: #ffffff;
+  font-size: 1.5em;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.insta-page-options-container .icon {
+  margin: 0px 15px;
+  cursor: pointer;
+}
+
+.insta-page-options-container .options-others {
+  display: flex;
+  justify-content: space-between;
+}
+
+.insta-overlay-editor {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  z-index: 100;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.insta-text-editor .text-container {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: 0;
+  display: flex;
+  justify-content: center;
+  padding-top: 30%;
+}
+
+.insta-text-editor .text-container textarea {
+  width: 50%;
+  height: 100%;
+  font-family: "bw_modelicabold";
+  background-color: transparent;
+  border: none;
+  color: #ffffff;
   text-align: center;
+  font-size: 1.1em;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
-  pointer-events: none;
+.insta-text-editor .option-container {
+  height: 100%;
+  width: 20%;
+  padding-top: 10%;
+  position: fixed;
+  z-index: 1;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.insta-overlay-editor .option-container button {
+  background-color: transparent;
+  border: none;
+  color: #ffffff;
+  font-family: "bw_modelicabold";
+  margin-bottom: 25px;
+}
+
+.insta-overlay-editor .option-container .color-pallette .color-item {
+  height: 25px;
+  width: 25px;
+  border: 1px solid #ffffff;
+  border-radius: 20px;
+  margin-bottom: 15px;
+}
+
+.insta-overlay-editor
+  .option-container
+  .color-pallette
+  .color-item.selected:after {
+  height: 21px;
+  width: 21px;
+  content: "";
+  position: absolute;
+  border-radius: 25px;
+  border: 2px solid #000000;
+}
+
+.insta-custom-elements-container {
+  position: fixed;
+  z-index: 2;
+  height: 100%;
+  width: 100%;
+}
+
+.insta-custom-elements-container .custom-text-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-family: "bw_modelicabold";
+  font-size: 1.1em;
+}
+
+.insta-custom-elements-container .custom-sticker-item {
+  position: absolute;
+  top: 35%;
+  left: 25%;
+  width: 200px;
+}
+
+.insta-custom-elements-container .custom-sticker-item img {
+  position: absolute;
+  width: 100%;
+}
+
+.insta-custom-elements-container > div {
+  background-color: transparent !important;
+  position: absolute;
+}
+
+.insta-brush-editor .canvas-container {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.insta-brush-editor .canvas-container > div {
+  background-color: transparent !important;
+}
+
+.insta-brush-editor .option-container.color-palette-container {
+  height: 100%;
+  width: 20%;
+  padding-top: 40px;
+  position: fixed;
+  z-index: 1;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.insta-brush-editor .option-container.brush-palette-container {
+  height: 10%;
+  width: 80%;
+  padding-top: 40px;
+  padding-left: 3%;
+  position: fixed;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.insta-brush-editor .option-container.brush-size-container {
+  height: 90%;
+  width: 20%;
+  top: 10%;
+  position: fixed;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.brush-size-container .brush-sizer {
+  height: 300px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.brush-size-container .brush-sizer .rc-slider-handle {
+  height: 28px;
+  width: 28px;
+  border-radius: 28px;
+  background-color: #dfe1e3;
+  border: none;
+  -webkit-box-shadow: 3px 2px 5px 0px rgba(0, 0, 0, 0.48);
+  -moz-box-shadow: 3px 2px 5px 0px rgba(0, 0, 0, 0.48);
+  box-shadow: 3px 2px 5px 0px rgba(0, 0, 0, 0.48);
+  margin-left: -12px;
+}
+
+.brush-size-container .brush-sizer .rc-slider-rail {
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 300px solid rgba(223, 225, 227, 0.7);
+  background-color: transparent;
+  border-radius: 0px;
+  margin-left: -10px;
+}
+
+.brush-size-container .brush-sizer .rc-slider-track {
+  background-color: transparent;
+}
+
+.insta-stickers-editor {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.6);
+  -webkit-box-shadow: -1px -4px 5px 0px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: -1px -4px 5px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: -1px -4px 5px 0px rgba(0, 0, 0, 0.2);
+}
+
+.insta-stickers-editor .overlay-notch {
+  height: 30px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.insta-stickers-editor .overlay-notch:after {
+  position: absolute;
+  height: 5px;
+  width: 50px;
+  content: "";
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.insta-stickers-editor .sticker-container {
+  height: calc(100% - 30px);
+  overflow: auto;
+}
+
+.insta-stickers-editor .sticker-container img {
+  width: 30%;
+  margin: 3% 1%;
+}
+
+.insta-sticker-background-container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 4;
+}
+
+.delete-me-container {
+  position: fixed;
+  z-index: 2000;
+  height: 64px;
+  width: 64px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  right: 0;
+  left: 0;
+  bottom: 5%;
+}
+
+.delete-me-container .delete-me {
+  height: 45px;
+  width: 45px;
+  border-radius: 45px;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  background-color: rgba(0, 0, 0, 0.3);
+  font-size: 1.3em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.delete-me-container .delete-me.hovered {
+  height: 60px;
+  width: 60px;
+  border-radius: 60px;
 }
