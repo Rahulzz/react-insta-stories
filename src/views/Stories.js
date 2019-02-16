@@ -55,6 +55,18 @@ class Stories extends Component {
     };
   }
 
+  componentDidMount = () => {
+    document.addEventListener(
+      "touchmove",
+      function(event) {
+        if (event.scale !== 1) {
+          event.preventDefault();
+        }
+      },
+      false
+    );
+  };
+
   isOverTrash = (x, y) => {
     var windowHeight = window.innerHeight;
     var windowWidth = window.innerWidth;
@@ -296,6 +308,7 @@ class Stories extends Component {
 
   handleDragStart = elementIndex => {
     this.setState({
+      displayCustomiser: true,
       displayTrash: true,
       currentDragIndex: elementIndex
     });
@@ -320,6 +333,7 @@ class Stories extends Component {
       }
     }
     this.setState({
+      displayCustomiser: false,
       displayTrash: false,
       currentDragIndex: 0
     });
