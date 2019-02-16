@@ -164,7 +164,7 @@ a {
 
 .insta-page-options-container {
   position: absolute;
-  z-index: 3;
+  z-index: 4;
   width: 100%;
   padding: 20px 0px;
   display: flex;
@@ -255,7 +255,7 @@ a {
 
 .insta-custom-elements-container {
   position: fixed;
-  z-index: 2;
+  z-index: 3;
   height: 100%;
   width: 100%;
 }
@@ -280,7 +280,14 @@ a {
   width: 100%;
 }
 
-.insta-custom-elements-container > div {
+.insta-drawing-elements-container {
+  position: fixed;
+  z-index: 2;
+  height: 100%;
+  width: 100%;
+}
+
+.insta-drawing-elements-container > div {
   background-color: transparent !important;
   position: absolute;
 }
@@ -440,4 +447,31 @@ a {
   height: 60px;
   width: 60px;
   border-radius: 60px;
+}
+
+.loading-notification {
+  font-family: "bw_modelicabold";
+  font-size: 0.6em;
+  text-transform: uppercase;
+  position: fixed;
+  z-index: 2000;
+  color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid #ffffff;
+  bottom: 10%;
+  margin: auto;
+  left: 0;
+  right: 0;
+  width: 180px;
+  height: 25px;
+  border-radius: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.render-section {
+  height: 100%;
+  width: 100%;
+  position: fixed;
 }

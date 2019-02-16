@@ -1,11 +1,11 @@
 import React, { Component } from "react";
+import ReactDOM from "react-dom";
 import CanvasDraw from "react-canvas-draw";
-import Slider, { Range } from "rc-slider";
+import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import html2canvas from "html2canvas";
 import Draggable from "react-draggable";
-import Gesture from "rc-gesture";
-import Hammer from "react-hammerjs";
+import NewWindow from "react-new-window";
 import Sticker1 from "../images/stickers/1.png";
 import Sticker2 from "../images/stickers/2.png";
 import Sticker3 from "../images/stickers/3.png";
@@ -29,6 +29,7 @@ class Stories extends Component {
   constructor(props) {
     super(props);
     this.customElements = [];
+    this.drawingElements = [];
     this.hammerOptions = {
       recognizers: {
         pinch: { enable: true }
@@ -45,12 +46,36 @@ class Stories extends Component {
       selectedBrushColor: "#ffffff",
       selectedBrushSize: 6,
       selectedTextColor: "#ffffff",
-      renderedCustomElements: null,
       imageContent: null,
       displayTrash: false,
-      trashHovered: false
+      trashHovered: false,
+      customElementCount: 0,
+      currentDragIndex: 0,
+      displayNotification: false
     };
   }
+
+  isOverTrash = (x, y) => {
+    var windowHeight = window.innerHeight;
+    var windowWidth = window.innerWidth;
+    var trashGrid = this.refs.trashBox.getBoundingClientRect();
+
+    var minVertical = windowHeight / 2 - (windowHeight - trashGrid.top);
+    var maxVertical = windowHeight / 2 - (windowHeight - trashGrid.bottom);
+    var minHorizontal = windowWidth / 2 - (windowWidth - trashGrid.left);
+    var maxHorizontal = windowWidth / 2 - (windowWidth - trashGrid.right);
+
+    if (
+      x >= minHorizontal &&
+      x <= maxHorizontal &&
+      y >= minVertical &&
+      y <= maxVertical
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  };
 
   launchImagePicker = () => {
     this.refs.fileUploader.click();
@@ -58,6 +83,7 @@ class Stories extends Component {
 
   discardImage = () => {
     this.customElements = [];
+    this.drawingElements = [];
     this.setState({
       imageUrl: ""
     });
@@ -107,7 +133,7 @@ class Stories extends Component {
 
     if (this.state.brushCustomiser) {
       var drawing = this.refs.canvasPage.getSaveData();
-      this.customElements.push(
+      this.drawingElements.push(
         <CanvasDraw
           canvasHeight="100%"
           canvasWidth="100%"
@@ -128,8 +154,14 @@ class Stories extends Component {
       this.refs.textInput.focus();
     } else {
       if (this.refs.textInput.value !== "") {
-        this.customElements.push(
-          <Draggable>
+        var elementIndex = this.state.customElementCount;
+
+        this.customElements[elementIndex] = (
+          <Draggable
+            onStart={() => this.handleDragStart(elementIndex)}
+            onDrag={this.handleDragMove}
+            onStop={this.handleDragEnd}
+          >
             <div
               className="custom-text-item"
               style={{ color: this.state.selectedTextColor }}
@@ -138,8 +170,9 @@ class Stories extends Component {
             </div>
           </Draggable>
         );
+
         this.setState({
-          renderedCustomElements: this.customElements
+          customElementCount: this.state.customElementCount + 1
         });
       }
       this.refs.textInput.value = "";
@@ -185,7 +218,7 @@ class Stories extends Component {
     });
   };
 
-  expandStickersOverlay = gestureStatus => {
+  expandStickersOverlay = () => {
     var computedTop = this.state.stickerOverlayTop;
 
     if (this.state.stickerOverlayTop === 50) {
@@ -208,9 +241,11 @@ class Stories extends Component {
   };
 
   addStickerToCanvas = sticker => {
-    this.customElements.push(
+    var elementIndex = this.state.customElementCount;
+
+    this.customElements[elementIndex] = (
       <Draggable
-        onStart={this.handleDragStart}
+        onStart={() => this.handleDragStart(elementIndex)}
         onDrag={this.handleDragMove}
         onStop={this.handleDragEnd}
       >
@@ -223,14 +258,35 @@ class Stories extends Component {
     this.setState({
       stickerCustomiser: false,
       displayCustomiser: false,
-      stickerOverlayTop: 110
+      stickerOverlayTop: 110,
+      customElementCount: this.state.customElementCount + 1
     });
   };
 
-  captureScreenToImage = () => {
-    html2canvas(document.body).then(function(canvas) {
+  downloadImageReady = canvas => {
+    var imageData = canvas.toDataURL();
+    ReactDOM.render(
+      <NewWindow>
+        <img src={imageData} alt="Insta render" />
+      </NewWindow>,
+      this.refs.trashBox
+    );
+    this.setState({
+      displayNotification: false
+    });
+  };
+
+  captureScreenToImage = object => {
+    var dataUrl = "";
+    var imageReady = false;
+
+    this.setState({
+      displayNotification: true
+    });
+
+    html2canvas(document.getElementById("toberendered")).then(function(canvas) {
       // document.body.appendChild(canvas);
-      // var image = canvas.toDataURL("image/jpg");
+      object.downloadImageReady(canvas);
     });
   };
 
@@ -238,17 +294,15 @@ class Stories extends Component {
     this.refs.finalDownload.click();
   };
 
-  handleDragStart = (e, data) => {
-    console.log("Event: ", e);
-    console.log("Data: ", data);
+  handleDragStart = elementIndex => {
     this.setState({
-      displayTrash: true
+      displayTrash: true,
+      currentDragIndex: elementIndex
     });
   };
 
-  handleDragMove = e => {
-    console.log("MOVEE : " + e.target.tagName);
-    if (e.target.className.indexOf("icon-trash") !== -1) {
+  handleDragMove = (e, data) => {
+    if (this.isOverTrash(data.x, data.y)) {
       this.setState({
         trashHovered: true
       });
@@ -259,15 +313,16 @@ class Stories extends Component {
     }
   };
 
-  handleDragEnd = e => {
-    console.log("DRAGGG : " + e.target.className);
+  handleDragEnd = (e, data) => {
+    if (this.isOverTrash(data.x, data.y)) {
+      if (this.state.currentDragIndex > -1) {
+        this.customElements.splice(this.state.currentDragIndex, 1);
+      }
+    }
     this.setState({
-      displayTrash: false
+      displayTrash: false,
+      currentDragIndex: 0
     });
-  };
-
-  testGesture = () => {
-    alert('works');
   };
 
   render() {
@@ -297,31 +352,35 @@ class Stories extends Component {
     } else {
       return (
         <React.Fragment>
-          <Gesture
-            onSwipe={gestureStatus => this.testGesture(gestureStatus)}
+          <div
+            className="loading-notification"
+            style={{
+              display: this.state.displayNotification ? "flex" : "none"
+            }}
+          >
+            generating final image
+          </div>
+          <div
+            className="delete-me-container"
+            style={{ display: this.state.displayTrash ? "flex" : "none" }}
           >
             <div
-              className="delete-me-container"
-              style={{ display: this.state.displayTrash ? "block" : "none" }}
-            >
-              <div
-                className={
-                  this.state.trashHovered
-                    ? "icon icon-trash delete-me hovered ease-element"
-                    : "icon icon-trash delete-me ease-element"
-                }
-              />
-            </div>
-          </Gesture>
+              ref="trashBox"
+              className={
+                this.state.trashHovered
+                  ? "icon icon-trash delete-me hovered ease-element"
+                  : "icon icon-trash delete-me ease-element"
+              }
+            />
+          </div>
           <div
             className="insta-stickers-editor insta-overlay-editor ease-element"
             style={{ top: this.state.stickerOverlayTop + "%" }}
           >
-            <Gesture
-              onTap={gestureStatus => this.expandStickersOverlay(gestureStatus)}
-            >
-              <div className="overlay-notch" />
-            </Gesture>
+            <div
+              className="overlay-notch"
+              onClick={this.expandStickersOverlay}
+            />
             <div className="sticker-container">
               <img
                 src={Sticker1}
@@ -635,7 +694,7 @@ class Stories extends Component {
             <div className="options-others">
               <div
                 className="icon icon-download"
-                onClick={this.captureScreenToImage}
+                onClick={() => this.captureScreenToImage(this)}
               />
               <div
                 className="icon icon-stickers"
@@ -658,15 +717,23 @@ class Stories extends Component {
               display: this.state.stickerCustomiser ? "block" : "none"
             }}
           />
-          <div
-            ref="customElementsContainer"
-            className="insta-custom-elements-container ease-element"
-          >
-            {this.customElements}
-          </div>
-          <div className="insta-image-editor">
-            <div className="image-container">
-              <img src={this.state.imageUrl} />
+          <div id="toberendered" className="render-section">
+            <div
+              ref="customElementsContainer"
+              className="insta-custom-elements-container ease-element"
+            >
+              {this.customElements}
+            </div>
+            <div
+              ref="drawingElementsContainer"
+              className="insta-drawing-elements-container ease-element"
+            >
+              {this.drawingElements}
+            </div>
+            <div className="insta-image-editor">
+              <div className="image-container">
+                <img src={this.state.imageUrl} />
+              </div>
             </div>
           </div>
         </React.Fragment>
