@@ -72,10 +72,10 @@ class Stories extends Component {
     var windowWidth = window.innerWidth;
     var trashGrid = this.refs.trashBox.getBoundingClientRect();
 
-    var minVertical = windowHeight / 2 - (windowHeight - trashGrid.top);
-    var maxVertical = windowHeight / 2 - (windowHeight - trashGrid.bottom);
-    var minHorizontal = windowWidth / 2 - (windowWidth - trashGrid.left);
-    var maxHorizontal = windowWidth / 2 - (windowWidth - trashGrid.right);
+    var minVertical = trashGrid.top;
+    var maxVertical = trashGrid.bottom;
+    var minHorizontal = trashGrid.left;
+    var maxHorizontal = trashGrid.right;
 
     if (
       x >= minHorizontal &&
@@ -315,7 +315,15 @@ class Stories extends Component {
   };
 
   handleDragMove = (e, data) => {
-    if (this.isOverTrash(data.x, data.y)) {
+    var positionX = e.pageX;
+    var positionY = e.pageY;
+    if (e.touches) {
+      var touch = e.touches[0];
+      positionX = touch.pageX;
+      positionY = touch.pageY;
+    }
+
+    if (this.isOverTrash(positionX, positionY)) {
       this.setState({
         trashHovered: true
       });
@@ -327,7 +335,7 @@ class Stories extends Component {
   };
 
   handleDragEnd = (e, data) => {
-    if (this.isOverTrash(data.x, data.y)) {
+    if (this.state.trashHovered) {
       if (this.state.currentDragIndex > -1) {
         this.customElements.splice(this.state.currentDragIndex, 1);
       }
