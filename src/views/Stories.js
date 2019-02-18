@@ -5,6 +5,7 @@ import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import html2canvas from "html2canvas";
 import Draggable from "react-draggable";
+import Hammer from "react-hammerjs";
 import NewWindow from "react-new-window";
 import Sticker1 from "../images/stickers/1.png";
 import Sticker2 from "../images/stickers/2.png";
@@ -51,7 +52,7 @@ class Stories extends Component {
       trashHovered: false,
       customElementCount: 0,
       currentDragIndex: 0,
-      displayNotification: false
+      displayNotification: false,
     };
   }
 
@@ -252,6 +253,14 @@ class Stories extends Component {
     });
   };
 
+  handleHammerPinchIn = () => {
+    console.log("handleHammerPinchIn");
+  };
+
+  handleHammerPinchOut = () => {
+    console.log("handleHammerPinchOut");
+  };
+
   addStickerToCanvas = sticker => {
     var elementIndex = this.state.customElementCount;
 
@@ -261,9 +270,15 @@ class Stories extends Component {
         onDrag={this.handleDragMove}
         onStop={this.handleDragEnd}
       >
-        <div className="custom-sticker-item">
-          <img src={sticker} alt="sticker" />
-        </div>
+        <Hammer
+          options={this.hammerOptions}
+          onPinchIn={this.handleHammerPinchIn}
+          onPinchIn={this.handleHammerPinchOut}
+        >
+          <div className="custom-sticker-item">
+            <img src={sticker} alt="sticker" />
+          </div>
+        </Hammer>
       </Draggable>
     );
 
