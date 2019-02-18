@@ -31,9 +31,13 @@ class Stories extends Component {
     super(props);
     this.customElements = [];
     this.drawingElements = [];
+    this.stickerElements = [];
+    this.textElements = [];
+    this.textColor = [];
     this.hammerOptions = {
       recognizers: {
-        pinch: { enable: true }
+        pinch: { enable: true },
+        rotate: { enable: true }
       }
     };
     this.state = {
@@ -53,6 +57,9 @@ class Stories extends Component {
       customElementCount: 0,
       currentDragIndex: 0,
       displayNotification: false,
+      last_rotation: 0,
+      start_rotation: 0,
+      rotation: 0
     };
   }
 
@@ -69,8 +76,6 @@ class Stories extends Component {
   };
 
   isOverTrash = (x, y) => {
-    var windowHeight = window.innerHeight;
-    var windowWidth = window.innerWidth;
     var trashGrid = this.refs.trashBox.getBoundingClientRect();
 
     var minVertical = trashGrid.top;
@@ -169,18 +174,28 @@ class Stories extends Component {
       if (this.refs.textInput.value !== "") {
         var elementIndex = this.state.customElementCount;
 
+        this.textElements[elementIndex] = this.refs.textInput.value;
+        this.textColor[elementIndex] = this.state.selectedTextColor;
         this.customElements[elementIndex] = (
           <Draggable
             onStart={() => this.handleDragStart(elementIndex)}
             onDrag={this.handleDragMove}
             onStop={this.handleDragEnd}
           >
-            <div
-              className="custom-text-item"
-              style={{ color: this.state.selectedTextColor }}
+            <Hammer
+              options={this.hammerOptions}
+              onRotateStart={e => this.handleHammerForText(e, elementIndex)}
+              onRotateEnd={e => this.handleHammerForText(e, elementIndex)}
+              onRotateMove={e => this.handleHammerForText(e, elementIndex)}
             >
-              {this.refs.textInput.value}
-            </div>
+              <div>
+                <div id={"text" + elementIndex} className="custom-text-item">
+                  <div style={{ color: this.state.selectedTextColor }}>
+                    {this.refs.textInput.value}
+                  </div>
+                </div>
+              </div>
+            </Hammer>
           </Draggable>
         );
 
@@ -253,17 +268,89 @@ class Stories extends Component {
     });
   };
 
-  handleHammerPinchIn = () => {
-    console.log("handleHammerPinchIn");
+  handleHammerForSticker = (e, elementIndex) => {
+    switch (e.type) {
+      case "rotatestart":
+        this.setState({
+          last_rotation: this.state.rotation,
+          start_rotation: e.rotation
+        });
+        break;
+
+      case "rotateend":
+        this.setState({
+          last_rotation: this.state.rotation
+        });
+        break;
+
+      case "rotatemove":
+        var diff = this.state.start_rotation - e.rotation;
+        this.setState({
+          rotation: this.state.last_rotation - diff
+        });
+        break;
+
+      default:
+        break;
+    }
+
+    ReactDOM.render(
+      <img
+        src={this.stickerElements[elementIndex]}
+        alt="sticker"
+        style={{
+          transform:
+            "rotate(" + this.state.rotation + "deg) scale(" + e.scale + ")"
+        }}
+      />,
+      document.getElementById("stickerImage" + elementIndex)
+    );
   };
 
-  handleHammerPinchOut = () => {
-    console.log("handleHammerPinchOut");
+  handleHammerForText = (e, elementIndex) => {
+    switch (e.type) {
+      case "rotatestart":
+        this.setState({
+          last_rotation: this.state.rotation,
+          start_rotation: e.rotation
+        });
+        break;
+
+      case "rotateend":
+        this.setState({
+          last_rotation: this.state.rotation
+        });
+        break;
+
+      case "rotatemove":
+        var diff = this.state.start_rotation - e.rotation;
+        this.setState({
+          rotation: this.state.last_rotation - diff
+        });
+        break;
+
+      default:
+        break;
+    }
+
+    ReactDOM.render(
+      <div
+        style={{
+          color: this.textColor[elementIndex],
+          transform:
+            "rotate(" + this.state.rotation + "deg) scale(" + e.scale + ")"
+        }}
+      >
+        {this.textElements[elementIndex]}
+      </div>,
+      document.getElementById("text" + elementIndex)
+    );
   };
 
   addStickerToCanvas = sticker => {
     var elementIndex = this.state.customElementCount;
 
+    this.stickerElements[elementIndex] = sticker;
     this.customElements[elementIndex] = (
       <Draggable
         onStart={() => this.handleDragStart(elementIndex)}
@@ -272,11 +359,21 @@ class Stories extends Component {
       >
         <Hammer
           options={this.hammerOptions}
-          onPinchIn={this.handleHammerPinchIn}
-          onPinchIn={this.handleHammerPinchOut}
+          onRotateStart={e => this.handleHammerForSticker(e, elementIndex)}
+          onRotateEnd={e => this.handleHammerForSticker(e, elementIndex)}
+          onRotateMove={e => this.handleHammerForSticker(e, elementIndex)}
         >
-          <div className="custom-sticker-item">
-            <img src={sticker} alt="sticker" />
+          <div>
+            <div
+              id={"stickerImage" + elementIndex}
+              className="custom-sticker-item"
+            >
+              <img
+                src={sticker}
+                alt="sticker"
+                style={{ transform: "scale(0.5)" }}
+              />
+            </div>
           </div>
         </Hammer>
       </Draggable>
@@ -304,9 +401,6 @@ class Stories extends Component {
   };
 
   captureScreenToImage = object => {
-    var dataUrl = "";
-    var imageReady = false;
-
     this.setState({
       displayNotification: true
     });
@@ -330,6 +424,10 @@ class Stories extends Component {
   };
 
   handleDragMove = (e, data) => {
+    if (e.touches.length > 1) {
+      return false;
+    }
+
     var positionX = e.pageX;
     var positionY = e.pageY;
     if (e.touches) {
@@ -352,7 +450,7 @@ class Stories extends Component {
   handleDragEnd = (e, data) => {
     if (this.state.trashHovered) {
       if (this.state.currentDragIndex > -1) {
-        this.customElements.splice(this.state.currentDragIndex, 1);
+        this.customElements[this.state.currentDragIndex] = "";
       }
     }
     this.setState({
@@ -769,7 +867,7 @@ class Stories extends Component {
             </div>
             <div className="insta-image-editor">
               <div className="image-container">
-                <img src={this.state.imageUrl} />
+                <img src={this.state.imageUrl} alt="insta-bg" />
               </div>
             </div>
           </div>

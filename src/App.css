@@ -262,22 +262,31 @@ a {
 
 .insta-custom-elements-container .custom-text-item {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  margin: auto;
+  top: 200px;
+  left: 0;
+  right: 0;
+}
+
+.insta-custom-elements-container .custom-text-item > div {
   font-family: "bw_modelicabold";
-  font-size: 1.1em;
+  font-size: 2em;
+  float: left;
+  padding: 30px;
 }
 
 .insta-custom-elements-container .custom-sticker-item {
   position: absolute;
-  top: 35%;
-  left: 25%;
-  width: 200px;
+  margin: auto;
+  top: 200px;
+  left: 0;
+  right: 0;
+  width: 300px;
 }
 
 .insta-custom-elements-container .custom-sticker-item img {
   position: absolute;
-  width: 100%;
+  widyj: 100%;
 }
 
 .insta-drawing-elements-container {
