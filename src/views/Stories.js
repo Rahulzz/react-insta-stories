@@ -6,7 +6,7 @@ import "rc-slider/assets/index.css";
 import html2canvas from "html2canvas";
 import Draggable from "react-draggable";
 import Hammer from "react-hammerjs";
-import NewWindow from "react-new-window";
+import FinalRender from "../components/FinalRender";
 import Sticker1 from "../images/stickers/1.png";
 import Sticker2 from "../images/stickers/2.png";
 import Sticker3 from "../images/stickers/3.png";
@@ -59,7 +59,9 @@ class Stories extends Component {
       displayNotification: false,
       last_rotation: 0,
       start_rotation: 0,
-      rotation: 0
+      rotation: 0,
+      showRenderPortal: false,
+      renderData: null
     };
   }
 
@@ -389,19 +391,16 @@ class Stories extends Component {
 
   downloadImageReady = canvas => {
     var imageData = canvas.toDataURL();
-    ReactDOM.render(
-      <NewWindow>
-        <img src={imageData} alt="Insta render" />
-      </NewWindow>,
-      this.refs.trashBox
-    );
     this.setState({
+      showRenderPortal: true,
+      renderData: imageData,
       displayNotification: false
     });
   };
 
   captureScreenToImage = object => {
     this.setState({
+      showRenderPortal: false,
       displayNotification: true
     });
 
@@ -871,6 +870,11 @@ class Stories extends Component {
               </div>
             </div>
           </div>
+          {this.state.showRenderPortal && (
+            <FinalRender>
+              <img src={this.state.renderData} alt="Insta render" />
+            </FinalRender>
+          )}
         </React.Fragment>
       );
     }
