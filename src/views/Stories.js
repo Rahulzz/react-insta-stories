@@ -66,15 +66,10 @@ class Stories extends Component {
   }
 
   componentDidMount = () => {
-    document.addEventListener(
-      "touchmove",
-      function(event) {
-        if (event.scale !== 1) {
-          event.preventDefault();
-        }
-      },
-      false
-    );
+    document.addEventListener('touchmove',
+        function(e) {
+            e.preventDefault();
+        }, {passive:false});
   };
 
   isOverTrash = (x, y) => {
@@ -390,7 +385,7 @@ class Stories extends Component {
   };
 
   downloadImageReady = canvas => {
-    var imageData = canvas.toDataURL();
+    var imageData = canvas.toDataURL('image/jpeg', 1.0);
     this.setState({
       showRenderPortal: true,
       renderData: imageData,
