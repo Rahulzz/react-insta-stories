@@ -4,6 +4,7 @@ import CanvasDraw from "react-canvas-draw";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import html2canvas from "html2canvas";
+import loadImage from "blueimp-load-image";
 import Draggable from "react-draggable";
 import Hammer from "react-hammerjs";
 import FinalRender from "../components/FinalRender";
@@ -41,7 +42,7 @@ class Stories extends Component {
       }
     };
     this.state = {
-      imageUrl: "",
+      imageSet: false,
       displayCustomiser: false,
       textCustomiser: false,
       brushCustomiser: false,
@@ -66,10 +67,13 @@ class Stories extends Component {
   }
 
   componentDidMount = () => {
-    document.addEventListener('touchmove',
-        function(e) {
-            e.preventDefault();
-        }, {passive:false});
+    document.addEventListener(
+      "touchmove",
+      function(e) {
+        e.preventDefault();
+      },
+      { passive: false }
+    );
   };
 
   isOverTrash = (x, y) => {
@@ -100,7 +104,7 @@ class Stories extends Component {
     this.customElements = [];
     this.drawingElements = [];
     this.setState({
-      imageUrl: ""
+      imageSet: false
     });
   };
 
@@ -108,19 +112,20 @@ class Stories extends Component {
     const file = this.refs.fileUploader.files[0];
     const reader = new FileReader();
 
-    reader.onloadend = () => {
-      this.setState({
-        imageUrl: reader.result
-      });
-    };
     if (file) {
-      reader.readAsDataURL(file);
       this.setState({
-        imageUrl: reader.result
+        imageSet: true
       });
+      loadImage(
+        file,
+        function(img) {
+          document.getElementById("insta-bg").appendChild(img);
+        },
+        { maxWidth: window.innerWidth, maxHeight: window.innerHeight, cover: true, canvas: true, orientation: true }
+      );
     } else {
       this.setState({
-        imageUrl: ""
+        imageSet: false
       });
     }
   };
@@ -385,7 +390,7 @@ class Stories extends Component {
   };
 
   downloadImageReady = canvas => {
-    var imageData = canvas.toDataURL('image/jpeg', 1.0);
+    var imageData = canvas.toDataURL("image/jpeg", 1.0);
     this.setState({
       showRenderPortal: true,
       renderData: imageData,
@@ -455,7 +460,7 @@ class Stories extends Component {
   };
 
   render() {
-    if (this.state.imageUrl === "") {
+    if (!this.state.imageSet) {
       return (
         <React.Fragment>
           <div className="insta-home">
@@ -860,9 +865,7 @@ class Stories extends Component {
               {this.drawingElements}
             </div>
             <div className="insta-image-editor">
-              <div className="image-container">
-                <img src={this.state.imageUrl} alt="insta-bg" />
-              </div>
+              <div id="insta-bg" className="image-container" />
             </div>
           </div>
           {this.state.showRenderPortal && (

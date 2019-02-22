@@ -155,11 +155,8 @@ a {
   overflow: hidden;
 }
 
-.insta-image-editor .image-container img {
+.insta-image-editor .image-container canvas {
   display: block;
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
 }
 
 .insta-page-options-container {
